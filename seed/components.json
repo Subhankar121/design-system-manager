@@ -1,0 +1,17 @@
+[
+  {
+    "id": "card.primary",
+    "name": "Card / Primary",
+    "tokensUsed": ["color.surface","color.text","radius.medium","shadow.medium","spacing.md"],
+    "structure": ["container","header","body","footer"],
+    "a11y": { "description": "Container for content and actions" }
+  },
+  {
+    "id": "button.primary",
+    "name": "Button / Primary",
+    "tokensUsed": ["color.primary","color.text","radius.medium","spacing.md"],
+    "structure": ["button"],
+    "a11y": { "description": "Primary CTA button" }
+  }
+]
+
