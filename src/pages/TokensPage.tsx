@@ -13,6 +13,10 @@ import { useToast } from '@/hooks/useToast';
 import { resolveTokens, validateTokenValue } from '@/lib/resolver';
 import { AlertBanner } from '@/components/AlertBanner';
 import { TokenDrawer } from '@/components/TokenDrawer';
+import { PageHeader } from '@/components/PageHeader';
+import { SectionHeader } from '@/components/SectionHeader';
+import { HelpBox } from '@/components/HelpBox';
+import { EmptyState } from '@/components/EmptyState';
 
 export function TokensPage() {
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -147,47 +151,62 @@ export function TokensPage() {
   const themeOptions = themes.length ? themes : [{ id: 'default', name: 'Default' } as Theme];
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase text-gray-500">Inventory</p>
-          <h1 className="text-3xl font-bold text-gray-900">Tokens</h1>
-          <p className="text-sm text-gray-500">Edit design tokens inline and track where they are used.</p>
-        </div>
-        <div className="flex flex-col items-end gap-3">
+    <div className="space-y-8">
+      <PageHeader
+        badge="Design Token System"
+        title="Design Tokens"
+        description="Manage your design system's foundational values. Base tokens define primitives, semantic tokens create meaningful aliases."
+        actions={
           <button
             onClick={handleResetTokens}
-            className="text-xs text-gray-600 border border-gray-200 px-3 py-1.5 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            title="Reset to seed data"
           >
-            Reset tokens
+            Reset to defaults
           </button>
-          <div className="flex items-center gap-3">
-          <div className="flex items-center rounded-md border border-gray-200 overflow-hidden">
+        }
+      />
+
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700">View</label>
+          <div className="flex items-center rounded-md border border-gray-300 bg-white overflow-hidden shadow-sm">
             <button
               onClick={() => setViewMode('base')}
-              className={`px-3 py-1.5 text-sm ${viewMode === 'base' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                viewMode === 'base' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
               aria-pressed={viewMode === 'base'}
             >
               Base tokens
             </button>
             <button
               onClick={() => setViewMode('themes')}
-              className={`px-3 py-1.5 text-sm border-l border-gray-200 ${viewMode === 'themes' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`px-4 py-2 text-sm font-medium border-l border-gray-300 transition-colors ${
+                viewMode === 'themes' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
               aria-pressed={viewMode === 'themes'}
             >
-              Themes (semantic)
+              Semantic tokens
             </button>
           </div>
-          {viewMode === 'themes' && (
-            <nav className="flex gap-2" aria-label="Themes">
+        </div>
+        {viewMode === 'themes' && themes.length > 0 && (
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700">Theme</label>
+            <nav className="flex gap-2" aria-label="Select theme">
               {themeOptions.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setSelectedThemeId(t.id)}
-                  className={`px-3 py-1.5 text-sm rounded-md border ${
+                  className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
                     selectedThemeId === t.id
-                      ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                   aria-current={selectedThemeId === t.id ? 'page' : undefined}
                 >
@@ -195,17 +214,39 @@ export function TokensPage() {
                 </button>
               ))}
             </nav>
-          )}
           </div>
-        </div>
-      </header>
+        )}
+      </div>
+
+      {viewMode === 'base' ? (
+        <HelpBox title="About base tokens" variant="info">
+          <p className="mb-2">Base tokens are the foundational design values in your system:</p>
+          <ul className="space-y-1 text-sm list-disc list-inside">
+            <li><strong>Colors:</strong> Raw color values organized by family (e.g., gray.100, blue.500)</li>
+            <li><strong>Spacing:</strong> Fixed measurements for padding, margins, and gaps</li>
+            <li><strong>Typography:</strong> Font families, sizes, and weights</li>
+            <li><strong>Effects:</strong> Shadows, border radius, and other visual properties</li>
+          </ul>
+          <p className="mt-2 text-sm">💡 Base tokens should rarely change - they're your design constants.</p>
+        </HelpBox>
+      ) : (
+        <HelpBox title="About semantic tokens" variant="tip">
+          <p className="mb-2">Semantic tokens create meaningful aliases that map to base tokens:</p>
+          <ul className="space-y-1 text-sm list-disc list-inside">
+            <li><strong>Purpose-driven:</strong> Names describe intent (e.g., "primary", "surface", "danger")</li>
+            <li><strong>Theme-aware:</strong> Override values per theme to create brand variations</li>
+            <li><strong>Context-specific:</strong> Adapt to different use cases (light/dark mode, brands)</li>
+          </ul>
+          <p className="mt-2 text-sm">💡 Components reference semantic tokens, making theme switching seamless.</p>
+        </HelpBox>
+      )}
 
       {invalidTokens.length > 0 && (
         <AlertBanner
           type="error"
-          title="Invalid tokens"
-          message={`${invalidTokens.length} token(s) have invalid values. Publishing will be blocked until they are fixed.`}
-          actionLabel="Review"
+          title="Validation errors detected"
+          message={`${invalidTokens.length} token${invalidTokens.length > 1 ? 's have' : ' has'} invalid values. Fix ${invalidTokens.length > 1 ? 'these' : 'this'} before publishing to prevent breaking changes.`}
+          actionLabel="Jump to first error"
           onAction={() => {
             const invalid = invalidTokens[0];
             document.getElementById(`token-input-${invalid.key}`)?.focus();
@@ -213,69 +254,126 @@ export function TokensPage() {
         />
       )}
 
-      <div className="border-b border-gray-200 mb-2">
-        <nav className="flex gap-2" aria-label="Token types">
-          {['all','color','size','spacing','shadow','font'].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTypeTab(t as typeof typeTab)}
-              className={`px-3 py-1.5 text-sm border-b-2 -mb-px capitalize ${
-                typeTab === t ? 'border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:text-gray-800'
-              }`}
-              aria-current={typeTab === t ? 'page' : undefined}
-            >
-              {t}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {typeTab === 'color' && viewMode === 'base' && baseColorFamilies.length > 0 && (
-        <div className="border-b border-gray-100 mb-3">
-          <nav className="flex flex-wrap gap-2" aria-label="Color families">
-            <button
-              onClick={() => setColorFamilyTab('all')}
-              className={`px-2 py-1 text-xs rounded-full border ${
-                colorFamilyTab === 'all'
-                  ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              All
-            </button>
-            {baseColorFamilies.map((family) => (
-              <button
-                key={family}
-                onClick={() => setColorFamilyTab(family)}
-                className={`px-2 py-1 text-xs rounded-full capitalize border ${
-                  colorFamilyTab === family
-                    ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {family}
-              </button>
-            ))}
-          </nav>
-        </div>
-      )}
-
-      <div className="space-y-8">
-        {groupedByType.map((group) => (
-          <section key={group.type} className="space-y-2">
-            <h2 className="text-sm font-semibold text-gray-700 capitalize">{group.type}</h2>
-            <TokenTable
-              tokens={group.tokens}
-              resolvedTokens={resolved}
-              baseTokens={tokens}
-              readOnly={viewMode === 'themes'}
-              onSave={handleSaveToken}
-              onDelete={handleDelete}
-              onEditMetadata={handleEditMetadata}
+      {displayTokens.length === 0 ? (
+        <EmptyState
+          icon={
+            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          }
+          title={`No ${viewMode === 'base' ? 'base' : 'semantic'} tokens found`}
+          description={`${viewMode === 'base' ? 'Base tokens define your design primitives.' : 'Semantic tokens create meaningful aliases for your UI.'} Load demo data to get started.`}
+          action={{
+            label: 'Load demo tokens',
+            onClick: handleResetTokens
+          }}
+        />
+      ) : (
+        <>
+          <section>
+            <SectionHeader
+              title={`Filter by type${typeTab !== 'all' ? `: ${typeTab}` : ''}`}
+              description="Browse tokens by category or view all at once"
+              badge={`${displayTokens.length} token${displayTokens.length !== 1 ? 's' : ''}`}
             />
+            <div className="border-b border-gray-200">
+              <nav className="flex gap-1" aria-label="Filter by token type">
+                {(['all','color','size','spacing','shadow','font'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTypeTab(t)}
+                    className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px capitalize transition-colors ${
+                      typeTab === t 
+                        ? 'border-indigo-500 text-indigo-700 bg-indigo-50/50' 
+                        : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                    }`}
+                    aria-current={typeTab === t ? 'page' : undefined}
+                  >
+                    {t === 'all' ? 'All types' : t}
+                  </button>
+                ))}
+              </nav>
+            </div>
           </section>
-        ))}
-      </div>
+
+          {typeTab === 'color' && viewMode === 'base' && baseColorFamilies.length > 0 && (
+            <section className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Color family
+              </label>
+              <nav className="flex flex-wrap gap-2" aria-label="Filter by color family">
+                <button
+                  onClick={() => setColorFamilyTab('all')}
+                  className={`px-3 py-1.5 text-sm rounded-md border font-medium transition-colors ${
+                    colorFamilyTab === 'all'
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  All families
+                </button>
+                {baseColorFamilies.map((family) => (
+                  <button
+                    key={family}
+                    onClick={() => setColorFamilyTab(family)}
+                    className={`px-3 py-1.5 text-sm rounded-md border capitalize font-medium transition-colors ${
+                      colorFamilyTab === family
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {family}
+                  </button>
+                ))}
+              </nav>
+            </section>
+          )}
+
+          <div className="space-y-8">
+            {groupedByType.length === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                <p className="text-sm text-gray-600">
+                  No {typeTab !== 'all' ? typeTab : ''} tokens found{colorFamilyTab !== 'all' ? ` in the ${colorFamilyTab} family` : ''}.
+                </p>
+                {(typeTab !== 'all' || colorFamilyTab !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setTypeTab('all');
+                      setColorFamilyTab('all');
+                    }}
+                    className="mt-3 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            ) : (
+              groupedByType.map((group) => (
+                <section key={group.type} className="space-y-3">
+                  <SectionHeader
+                    title={group.type.charAt(0).toUpperCase() + group.type.slice(1)}
+                    badge={`${group.tokens.length}`}
+                    description={
+                      viewMode === 'themes'
+                        ? `Showing resolved values for ${activeTheme?.name ?? 'default'} theme`
+                        : undefined
+                    }
+                  />
+                  <TokenTable
+                    tokens={group.tokens}
+                    resolvedTokens={resolved}
+                    baseTokens={tokens}
+                    readOnly={viewMode === 'themes'}
+                    onSave={handleSaveToken}
+                    onDelete={handleDelete}
+                    onEditMetadata={handleEditMetadata}
+                  />
+                </section>
+              ))
+            )}
+          </div>
+        </>
+      )}
 
       <TokenDrawer
         token={metadataToken}
