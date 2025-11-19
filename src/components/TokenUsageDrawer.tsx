@@ -15,7 +15,7 @@ export function TokenUsageDrawer({ token, components, presets, isOpen, onClose }
   const presetOverrides = presets.filter(
     (preset) =>
       preset.globalOverrides[token.key] ||
-      Object.values(preset.componentOverrides || {}).some((map) => map[token.key])
+      Object.values(preset.components || {}).some((map) => map[token.key])
   );
 
   return (
@@ -34,6 +34,12 @@ export function TokenUsageDrawer({ token, components, presets, isOpen, onClose }
               <h2 id="token-usage-title" className="text-xl font-semibold text-gray-900">
                 {token.key}
               </h2>
+              {token.description && <p className="text-sm text-gray-500">{token.description}</p>}
+              {token.type === 'color' && token.contrastAgainst && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Contrast ≥ {token.contrastMin ?? 4.5}:1 vs {token.contrastAgainst}
+                </p>
+              )}
             </div>
             <button
               onClick={onClose}

@@ -1,27 +1,29 @@
 import tokensSeed from '../../seed/tokens.json';
 import componentsSeed from '../../seed/components.json';
-import presetsSeed from '../../seed/presets.json';
+import themesSeed from '../../seed/themes.json';
 import {
   Token,
   ComponentDef,
-  Preset,
-  PresetVersion,
-  PresetSnapshot,
+  Theme,
+  ThemeVersion,
+  ThemeSnapshot,
   PublishMetadata,
 } from '@/types';
 
 const STORAGE_KEYS = {
   tokens: 'dsm:tokens',
   components: 'dsm:components',
-  presets: 'dsm:presets',
+  themes: 'dsm:themes',
 };
+
+const SEED_VERSION = '2025-semantic-palette-v1';
 
 const VERSION_PREFIX = 'dsm:versions:';
 export const SNAPSHOT_STORAGE_PREFIX = 'dsm:snapshots:';
 
 const LATENCY_MS = 100;
 
-type ChangeType = 'tokens' | 'components' | 'presets';
+type ChangeType = 'tokens' | 'components' | 'themes';
 
 const delay = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS));
 
@@ -47,23 +49,38 @@ const writeJSON = (key: string, value: unknown) => {
   window.localStorage.setItem(key, JSON.stringify(value));
 };
 
-const snapshotKey = (presetId: string) => `${VERSION_PREFIX}${presetId}`;
+const snapshotKey = (themeId: string) => `${VERSION_PREFIX}${themeId}`;
+
+const needsPaletteUpgrade = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const existing = readJSON<Token[] | null>(STORAGE_KEYS.tokens, null);
+  if (!Array.isArray(existing) || existing.length === 0) {
+    return true;
+  }
+  const hasFamilyPalette = existing.some((token) => token.key.startsWith('color.') && token.key.split('.').length >= 3);
+  const hasSemanticCore = existing.some((token) => token.key.startsWith('semantic.color.surface'));
+  return !(hasFamilyPalette && hasSemanticCore);
+};
 
 export async function initSeedDataIfNeeded(force = false) {
   if (typeof window === 'undefined') return;
-  const alreadySeeded = window.localStorage.getItem('dsm:seeded');
-  if (alreadySeeded && !force) return;
+  const currentVersion = window.localStorage.getItem('dsm:seed-version');
+  const paletteUpgradeNeeded = needsPaletteUpgrade();
+  if (!force && currentVersion === SEED_VERSION && !paletteUpgradeNeeded) {
+    return;
+  }
 
   writeJSON(STORAGE_KEYS.tokens, tokensSeed);
   writeJSON(STORAGE_KEYS.components, componentsSeed);
-  writeJSON(STORAGE_KEYS.presets, presetsSeed);
+  writeJSON(STORAGE_KEYS.themes, themesSeed);
   Object.keys(window.localStorage)
     .filter((key) => key.startsWith(VERSION_PREFIX) || key.startsWith(SNAPSHOT_STORAGE_PREFIX))
     .forEach((key) => window.localStorage.removeItem(key));
+  window.localStorage.setItem('dsm:seed-version', SEED_VERSION);
   window.localStorage.setItem('dsm:seeded', new Date().toISOString());
   dispatchChange('tokens');
   dispatchChange('components');
-  dispatchChange('presets');
+  dispatchChange('themes');
 }
 
 const ensureSeeded = async () => {
@@ -120,47 +137,53 @@ export async function saveComponent(component: ComponentDef): Promise<void> {
   dispatchChange('components', component.id);
 }
 
-// Preset API
-export async function getPresets(): Promise<Preset[]> {
+// Theme API
+export async function getThemes(): Promise<Theme[]> {
   await ensureSeeded();
   await delay();
-  return readJSON<Preset[]>(STORAGE_KEYS.presets, []);
+  return readJSON<Theme[]>(STORAGE_KEYS.themes, []);
 }
 
-export async function getPreset(id: string): Promise<Preset | null> {
-  const presets = await getPresets();
-  return presets.find((p) => p.id === id) ?? null;
+export async function getTheme(id: string): Promise<Theme | null> {
+  const themes = await getThemes();
+  return themes.find((t) => t.id === id) ?? null;
 }
 
-export async function savePresetDraft(preset: Preset): Promise<void> {
+export async function saveThemeDraft(theme: Theme): Promise<void> {
   await ensureSeeded();
-  const presets = await getPresets();
-  const idx = presets.findIndex((p) => p.id === preset.id);
+  const themes = await getThemes();
+  const idx = themes.findIndex((t) => t.id === theme.id);
   if (idx >= 0) {
-    presets[idx] = preset;
+    themes[idx] = theme;
   } else {
-    presets.push(preset);
+    themes.push(theme);
   }
-  writeJSON(STORAGE_KEYS.presets, presets);
-  dispatchChange('presets', preset.id);
+  writeJSON(STORAGE_KEYS.themes, themes);
+  dispatchChange('themes', theme.id);
 }
 
-export async function deletePreset(id: string): Promise<void> {
+export async function deleteTheme(id: string): Promise<void> {
   await ensureSeeded();
-  const presets = await getPresets();
+  const themes = await getThemes();
   writeJSON(
-    STORAGE_KEYS.presets,
-    presets.filter((p) => p.id !== id)
+    STORAGE_KEYS.themes,
+    themes.filter((t) => t.id !== id)
   );
-  dispatchChange('presets', id);
+  dispatchChange('themes', id);
 }
 
-const getVersionCollection = async (presetId: string): Promise<PresetVersion[]> => {
-  return readJSON<PresetVersion[]>(snapshotKey(presetId), []);
+// Legacy aliases for backward compatibility
+export const getPresets = getThemes;
+export const getPreset = getTheme;
+export const savePresetDraft = saveThemeDraft;
+export const deletePreset = deleteTheme;
+
+const getVersionCollection = async (themeId: string): Promise<ThemeVersion[]> => {
+  return readJSON<ThemeVersion[]>(snapshotKey(themeId), []);
 };
 
-const saveVersionCollection = (presetId: string, versions: PresetVersion[]) => {
-  writeJSON(snapshotKey(presetId), versions);
+const saveVersionCollection = (themeId: string, versions: ThemeVersion[]) => {
+  writeJSON(snapshotKey(themeId), versions);
 };
 
 const buildTokenMap = (tokens: Token[]) =>
@@ -176,34 +199,34 @@ const bumpPatch = (version?: string) => {
   return `${major}.${minor}.${nextPatch}`;
 };
 
-const persistSnapshot = (snapshotId: string, snapshot: PresetSnapshot) => {
+const persistSnapshot = (snapshotId: string, snapshot: ThemeSnapshot) => {
   writeJSON(`${SNAPSHOT_STORAGE_PREFIX}${snapshotId}`, snapshot);
 };
 
-export async function publishPreset(
-  presetId: string,
+export async function publishTheme(
+  themeId: string,
   metadata: PublishMetadata
-): Promise<PresetVersion> {
+): Promise<ThemeVersion> {
   await ensureSeeded();
-  const preset = await getPreset(presetId);
-  if (!preset) {
-    throw new Error(`Preset ${presetId} not found`);
+  const theme = await getTheme(themeId);
+  if (!theme) {
+    throw new Error(`Theme ${themeId} not found`);
   }
-  const [tokens, versions] = await Promise.all([getTokens(), getVersionCollection(presetId)]);
+  const [tokens, versions] = await Promise.all([getTokens(), getVersionCollection(themeId)]);
   const latest = versions[0];
   const tokenMap = buildTokenMap(tokens);
-  Object.entries(preset.globalOverrides || {}).forEach(([key, value]) => {
+  Object.entries(theme.globalOverrides || {}).forEach(([key, value]) => {
     tokenMap[key] = value;
   });
 
-  const snapshot: PresetSnapshot = {
+  const snapshot: ThemeSnapshot = {
     tokens: tokenMap,
-    componentOverrides: { ...preset.componentOverrides },
+    components: { ...theme.components },
   };
 
-  const version: PresetVersion = {
+  const version: ThemeVersion = {
     snapshotId: `snapshot-${Date.now()}`,
-    presetId,
+    themeId,
     version: bumpPatch(latest?.version),
     createdBy: metadata.createdBy,
     createdAt: new Date().toISOString(),
@@ -212,26 +235,29 @@ export async function publishPreset(
   };
 
   const nextVersions = [version, ...versions];
-  saveVersionCollection(presetId, nextVersions);
+  saveVersionCollection(themeId, nextVersions);
   persistSnapshot(version.snapshotId, snapshot);
 
-  preset.publishedVersions = [...(preset.publishedVersions || []), version.snapshotId];
-  await savePresetDraft(preset);
-  dispatchChange('presets', presetId);
+  theme.publishedVersions = [...(theme.publishedVersions || []), version.snapshotId];
+  await saveThemeDraft(theme);
+  dispatchChange('themes', themeId);
   return version;
 }
 
-export async function getPresetVersions(presetId: string): Promise<PresetVersion[]> {
+// Legacy alias
+export const publishPreset = publishTheme;
+
+export async function getThemeVersions(themeId: string): Promise<ThemeVersion[]> {
   await ensureSeeded();
   await delay();
-  return getVersionCollection(presetId);
+  return getVersionCollection(themeId);
 }
 
-export async function getPresetVersion(
-  presetId: string,
+export async function getThemeVersion(
+  themeId: string,
   versionOrSnapshotId: string
-): Promise<PresetVersion | null> {
-  const versions = await getVersionCollection(presetId);
+): Promise<ThemeVersion | null> {
+  const versions = await getVersionCollection(themeId);
   return (
     versions.find(
       (v) => v.version === versionOrSnapshotId || v.snapshotId === versionOrSnapshotId
@@ -239,19 +265,19 @@ export async function getPresetVersion(
   );
 }
 
-export async function revertPresetVersion(
-  presetId: string,
+export async function revertThemeVersion(
+  themeId: string,
   snapshotId: string,
   metadata: PublishMetadata
-): Promise<PresetVersion> {
-  const version = await getPresetVersion(presetId, snapshotId);
+): Promise<ThemeVersion> {
+  const version = await getThemeVersion(themeId, snapshotId);
   if (!version) {
     throw new Error(`Snapshot ${snapshotId} not found`);
   }
 
-  const preset = await getPreset(presetId);
-  if (!preset) {
-    throw new Error(`Preset ${presetId} not found`);
+  const theme = await getTheme(themeId);
+  if (!theme) {
+    throw new Error(`Theme ${themeId} not found`);
   }
 
   const baseTokens = await getTokens();
@@ -263,21 +289,26 @@ export async function revertPresetVersion(
     }
   });
 
-  preset.globalOverrides = newOverrides;
-  preset.componentOverrides = { ...version.snapshot.componentOverrides };
-  await savePresetDraft(preset);
-  return publishPreset(presetId, metadata);
+  theme.globalOverrides = newOverrides;
+  theme.components = { ...version.snapshot.components };
+  await saveThemeDraft(theme);
+  return publishTheme(themeId, metadata);
 }
 
 export async function downloadSnapshot(snapshotId: string): Promise<string> {
   await ensureSeeded();
   await delay();
-  const snapshot = readJSON<PresetSnapshot | null>(`${SNAPSHOT_STORAGE_PREFIX}${snapshotId}`, null);
+  const snapshot = readJSON<ThemeSnapshot | null>(`${SNAPSHOT_STORAGE_PREFIX}${snapshotId}`, null);
   if (!snapshot) {
     throw new Error('Snapshot not found');
   }
   return JSON.stringify(snapshot, null, 2);
 }
+
+// Legacy aliases
+export const getPresetVersions = getThemeVersions;
+export const getPresetVersion = getThemeVersion;
+export const revertPresetVersion = revertThemeVersion;
 
 export async function resetSeedData() {
   await initSeedDataIfNeeded(true);

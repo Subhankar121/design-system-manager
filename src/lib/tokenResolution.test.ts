@@ -1,47 +1,47 @@
 import { describe, it, expect } from 'vitest';
 import { resolveTokens } from './resolver';
-import { Token, Preset } from '@/types';
+import { Token, Theme } from '@/types';
 
 describe('Token Resolution', () => {
   const baseTokens: Token[] = [
-    { key: 'color.primary', type: 'color', value: '#0057D9' },
-    { key: 'color.surface', type: 'color', value: '#ffffff' },
+    { key: 'semantic.color.primary', type: 'color', value: '#2563eb' },
+    { key: 'semantic.color.surface', type: 'color', value: '#ffffff' },
     { key: 'radius.medium', type: 'size', value: '8px' },
   ];
 
-  it('should return base tokens when no preset is provided', () => {
-    const result = resolveTokens(baseTokens, null);
-    expect(result['color.primary']).toBe('#0057D9');
+  it('should return base tokens when no theme is provided', () => {
+    const result = resolveTokens(baseTokens, undefined);
+    expect(result['semantic.color.primary']).toBe('#2563eb');
   });
 
-  it('should apply global overrides from preset', () => {
-    const preset: Preset = {
+  it('should apply global overrides from theme', () => {
+    const theme: Theme = {
       id: 'test',
       name: 'Test',
       globalOverrides: {
-        'color.primary': '#FF0000',
+        'semantic.color.primary': '#FF0000',
       },
-      componentOverrides: {},
+      components: {},
       publishedVersions: [],
     };
 
-    const result = resolveTokens(baseTokens, preset);
-    expect(result['color.primary']).toBe('#FF0000');
+    const result = resolveTokens(baseTokens, theme);
+    expect(result['semantic.color.primary']).toBe('#FF0000');
   });
 
   it('should preserve non-overridden tokens', () => {
-    const preset: Preset = {
+    const theme: Theme = {
       id: 'test',
       name: 'Test',
       globalOverrides: {
-        'color.primary': '#FF0000',
+        'semantic.color.primary': '#FF0000',
       },
-      componentOverrides: {},
+      components: {},
       publishedVersions: [],
     };
 
-    const result = resolveTokens(baseTokens, preset);
-    expect(result['color.surface']).toBe('#ffffff');
+    const result = resolveTokens(baseTokens, theme);
+    expect(result['semantic.color.surface']).toBe('#ffffff');
   });
 });
 

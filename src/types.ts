@@ -10,40 +10,56 @@ export interface Token {
   value: string;
   description?: string;
   locked?: boolean;
+  contrastAgainst?: string;
+  contrastMin?: number;
+}
+
+export interface ComponentVariant {
+  id: string;
+  name: string;
+  description?: string;
+  tokens?: string[];
 }
 
 export interface ComponentDef {
   id: string;
   name: string;
+  category?: string;
   tokensUsed: string[];
   structure: string[];
   a11y?: {
     description?: string;
   };
+  variants?: ComponentVariant[];
 }
 
-export interface Preset {
+export interface Theme {
   id: string;
   name: string;
   globalOverrides: Record<string, string>;
-  componentOverrides: Record<string, Record<string, string>>;
+  components: Record<string, Record<string, string>>;
   publishedVersions: string[];
 }
 
-export interface PresetSnapshot {
+export interface ThemeSnapshot {
   tokens: TokenValueMap;
-  componentOverrides: Record<string, Record<string, string>>;
+  components: Record<string, Record<string, string>>;
 }
 
-export interface PresetVersion {
+export interface ThemeVersion {
   snapshotId: string;
-  presetId: string;
+  themeId: string;
   version: string;
   createdBy: string;
   createdAt: string;
-  snapshot: PresetSnapshot;
+  snapshot: ThemeSnapshot;
   changelog?: unknown;
 }
+
+// Legacy aliases for backward compatibility during migration
+export type Preset = Theme;
+export type PresetSnapshot = ThemeSnapshot;
+export type PresetVersion = ThemeVersion;
 
 export interface PublishMetadata {
   createdBy: string;
@@ -79,13 +95,23 @@ export interface ImpactReport {
   changedTokens: ImpactTokenChange[];
   affectedComponents: string[];
   severity: 'low' | 'medium' | 'high';
+  componentSummaries?: ImpactComponentSummary[];
 }
 
 export interface ImpactMetadata {
   tokensChanged: number;
   componentsAffected: number;
   globalOverridesCount: number;
-  componentOverridesCount: number;
+  componentsCount: number;
+}
+
+export interface ImpactComponentSummary {
+  id: string;
+  name: string;
+  structure: string[];
+  tokensImpacted: string[];
+  variantCount: number;
+  severity: 'low' | 'medium' | 'high';
 }
 
 export interface ToastMessage {

@@ -1,57 +1,41 @@
-import { ComponentDef, Preset, Token } from '@/types';
-import { getContrastRatio, aaAARating, validateTokenValue } from '@/lib/resolver';
-import { useEffect, useMemo, useState } from 'react';
+import { Token, TokenValueMap } from '@/types';
+import { getContrastRatio, aaAARating, validateTokenValue, findBaseAliasForValue } from '@/lib/resolver';
+import { useEffect, useState } from 'react';
+import { TokenContrastModal } from '@/components/TokenContrastModal';
 
 interface TokenTableProps {
   tokens: Token[];
-  surfaceColor: string;
-  components: ComponentDef[];
-  presets: Preset[];
+  resolvedTokens: TokenValueMap;
+  baseTokens?: Token[];
+  readOnly?: boolean;
   onSave: (token: Token) => Promise<void>;
   onDelete: (token: Token) => Promise<void>;
-  onWhereUsed: (token: Token) => void;
+  onEditMetadata: (tokenKey: string) => void;
 }
 
 export function TokenTable({
   tokens,
-  surfaceColor,
-  components,
-  presets,
+  resolvedTokens,
+  baseTokens = [],
+  readOnly = false,
   onSave,
   onDelete,
-  onWhereUsed,
+  onEditMetadata,
 }: TokenTableProps) {
   const [draftValues, setDraftValues] = useState<Record<string, string>>({});
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [contrastDetails, setContrastDetails] = useState<{
+    token: Token;
+    value: string;
+    backgroundKey: string;
+    backgroundValue: string;
+    ratio: number;
+    required: number;
+  } | null>(null);
 
   useEffect(() => {
     setDraftValues({});
   }, [tokens]);
-
-  const componentUsage = useMemo(() => {
-    const usage: Record<string, number> = {};
-    components.forEach((component) => {
-      component.tokensUsed.forEach((tokenKey) => {
-        usage[tokenKey] = (usage[tokenKey] || 0) + 1;
-      });
-    });
-    return usage;
-  }, [components]);
-
-  const presetUsage = useMemo(() => {
-    const usage: Record<string, number> = {};
-    presets.forEach((preset) => {
-      Object.keys(preset.globalOverrides || {}).forEach((key) => {
-        usage[key] = (usage[key] || 0) + 1;
-      });
-      Object.values(preset.componentOverrides || {}).forEach((overrideMap) => {
-        Object.keys(overrideMap).forEach((key) => {
-          usage[key] = (usage[key] || 0) + 1;
-        });
-      });
-    });
-    return usage;
-  }, [presets]);
 
   const handleBlur = async (token: Token) => {
     const draftValue = draftValues[token.key];
@@ -69,18 +53,26 @@ export function TokenTable({
             <th className="px-4 py-3 text-left">Token</th>
             <th className="px-4 py-3 text-left">Value</th>
             <th className="px-4 py-3 text-left">Contrast</th>
-            <th className="px-4 py-3 text-left">Usage</th>
             <th className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
           {tokens.map((token) => {
             const value = draftValues[token.key] ?? token.value;
-            const ratio = token.type === 'color' ? getContrastRatio(value, surfaceColor) : null;
-            const rating = ratio ? aaAARating(ratio) : null;
-            const invalid = !token.locked && Boolean(validateTokenValue({ ...token, value }));
-            const usageCount = componentUsage[token.key] || 0;
-            const overrideCount = presetUsage[token.key] || 0;
+            const contrastTargetKey = token.contrastAgainst || 'semantic.color.surface';
+            const fallbackSurface = resolvedTokens['semantic.color.surface'] ?? '#ffffff';
+            const backgroundValue = resolvedTokens[contrastTargetKey] ?? fallbackSurface;
+            const contrastRatio =
+              token.type === 'color' ? getContrastRatio(value, backgroundValue) : 0;
+            const hasContrast = token.type === 'color' && contrastRatio > 0;
+            const rating = hasContrast ? aaAARating(contrastRatio) : null;
+            const requiredRatio = token.type === 'color' ? token.contrastMin ?? 4.5 : 0;
+            const passesRequirement = hasContrast ? contrastRatio >= requiredRatio : null;
+            const invalid = !readOnly && !token.locked && Boolean(validateTokenValue({ ...token, value }));
+            const isSemantic = token.key.startsWith('semantic.');
+            const resolvedValue = resolvedTokens[token.key] ?? token.value;
+            const aliasKey =
+              readOnly && isSemantic ? findBaseAliasForValue(resolvedValue, baseTokens) : null;
 
             return (
               <tr key={token.key} className={invalid ? 'bg-red-50/40' : undefined}>
@@ -107,58 +99,74 @@ export function TokenTable({
                   </div>
                 </td>
                 <td className="px-4 py-3 align-top">
-                  <input
-                    type="text"
-                    id={`token-input-${token.key}`}
-                    value={value}
-                    disabled={token.locked}
-                    onChange={(event) =>
-                      setDraftValues((prev) => ({
-                        ...prev,
-                        [token.key]: event.target.value,
-                      }))
-                    }
-                    onBlur={() => handleBlur(token)}
-                    className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                      invalid ? 'border-red-300' : 'border-gray-200'
-                    }`}
-                    aria-invalid={invalid}
-                  />
-                  {invalid && (
-                    <p className="text-xs text-red-600 mt-1">Invalid {token.type} value</p>
+                  {readOnly ? (
+                    <div className="text-sm">
+                      <p className="font-medium text-gray-900">
+                        {aliasKey ?? resolvedValue}
+                      </p>
+                      {aliasKey && (
+                        <p className="text-xs text-gray-500">base: {resolvedValue}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        id={`token-input-${token.key}`}
+                        value={value}
+                        disabled={token.locked}
+                        onChange={(event) =>
+                          setDraftValues((prev) => ({
+                            ...prev,
+                            [token.key]: event.target.value,
+                          }))
+                        }
+                        onBlur={() => handleBlur(token)}
+                        className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                          invalid ? 'border-red-300' : 'border-gray-200'
+                        }`}
+                        aria-invalid={invalid}
+                      />
+                      {invalid && (
+                        <p className="text-xs text-red-600 mt-1">Invalid {token.type} value</p>
+                      )}
+                    </>
                   )}
                 </td>
                 <td className="px-4 py-3 align-top">
-                  {ratio ? (
-                    <span
+                  {hasContrast ? (
+                    <button
+                      type="button"
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                        rating === 'AAA'
+                        passesRequirement
                           ? 'bg-green-100 text-green-800'
-                          : rating === 'AA'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                          : 'bg-red-100 text-red-700'
                       }`}
-                      title={`Contrast vs surface: ${ratio}:1`}
+                      onClick={() =>
+                        setContrastDetails({
+                          token,
+                          value,
+                          backgroundKey: contrastTargetKey,
+                          backgroundValue,
+                          ratio: contrastRatio,
+                          required: requiredRatio,
+                        })
+                      }
+                      title={`Contrast vs ${contrastTargetKey}: ${contrastRatio}:1`}
                     >
-                      {rating} ({ratio}:1)
-                    </span>
+                      {rating} ({contrastRatio}:1)
+                    </button>
                   ) : (
                     <span className="text-xs text-gray-500">n/a</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-600 align-top">
-                  <div className="flex items-center gap-3">
-                    <span>{usageCount} components</span>
-                    <span>{overrideCount} presets</span>
-                  </div>
-                </td>
                 <td className="px-4 py-3 text-right align-top">
                   <div className="flex justify-end gap-2">
                     <button
-                      onClick={() => onWhereUsed(token)}
+                      onClick={() => onEditMetadata(token.key)}
                       className="text-xs px-2 py-1 border border-gray-200 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                      Where used
+                      Details
                     </button>
                     <button
                       onClick={() => onDelete(token)}
@@ -174,6 +182,17 @@ export function TokenTable({
           })}
         </tbody>
       </table>
+      {contrastDetails && (
+        <TokenContrastModal
+          token={contrastDetails.token}
+          foregroundValue={contrastDetails.value}
+          backgroundKey={contrastDetails.backgroundKey}
+          backgroundValue={contrastDetails.backgroundValue}
+          ratio={contrastDetails.ratio}
+          requiredRatio={contrastDetails.required}
+          onClose={() => setContrastDetails(null)}
+        />
+      )}
     </div>
   );
 }

@@ -2,16 +2,194 @@
   {
     "id": "card.primary",
     "name": "Card / Primary",
-    "tokensUsed": ["color.surface","color.text","radius.medium","shadow.medium","spacing.md"],
+    "category": "Content",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.border","radius.medium","shadow.medium","spacing.md","font.base"],
     "structure": ["container","header","body","footer"],
-    "a11y": { "description": "Container for content and actions" }
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Neutral surface for dashboard widgets" },
+      { "id": "highlight", "name": "Highlight", "description": "Accent border with elevated shadow" }
+    ],
+    "a11y": { "description": "Container for content and actions. Ensure headings stay in logical order." }
   },
   {
     "id": "button.primary",
     "name": "Button / Primary",
-    "tokensUsed": ["color.primary","color.text","radius.medium","spacing.md"],
+    "category": "Controls",
+    "tokensUsed": ["semantic.color.primary","semantic.color.surface","radius.medium","spacing.sm","font.base","shadow.medium"],
     "structure": ["button"],
-    "a11y": { "description": "Primary CTA button" }
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Solid brand background" },
+      { "id": "loading", "name": "Loading", "description": "Spinner + reduced opacity" }
+    ],
+    "a11y": { "description": "Primary CTA button. Provide aria-labels for icon-only buttons." }
+  },
+  {
+    "id": "button.secondary",
+    "name": "Button / Secondary",
+    "category": "Controls",
+    "tokensUsed": ["semantic.color.surface","semantic.color.primary","semantic.color.border","radius.medium","spacing.sm","font.base"],
+    "structure": ["button"],
+    "variants": [
+      { "id": "ghost", "name": "Ghost", "description": "Border-only button" },
+      { "id": "outline", "name": "Outline", "description": "High contrast outline" }
+    ],
+    "a11y": { "description": "Secondary CTA button. Maintain 3:1 contrast for border vs surface." }
+  },
+  {
+    "id": "hero.banner",
+    "name": "Hero Banner",
+    "category": "Content",
+    "tokensUsed": ["semantic.color.primary","semantic.color.secondary","semantic.color.surface","semantic.color.text","spacing.lg","spacing.md","radius.large","shadow.deep","font.base"],
+    "structure": ["section","media","copy","cta"],
+    "variants": [
+      { "id": "split", "name": "Split Layout", "description": "Copy + CTA left, media right" },
+      { "id": "stacked", "name": "Stacked", "description": "Mobile friendly stacked layout" }
+    ],
+    "a11y": { "description": "Ensure heading order and aria-label on CTA group. Provide meaningful alt text for imagery." }
+  },
+  {
+    "id": "navbar.global",
+    "name": "Global Navigation",
+    "category": "Navigation",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.accent","spacing.md","spacing.sm","font.base"],
+    "structure": ["bar","brand","links","actions"],
+    "variants": [
+      { "id": "desktop", "name": "Desktop", "description": "Full width horizontal navigation" },
+      { "id": "mobile", "name": "Mobile Drawer", "description": "Collapsed menu w/ icon buttons" }
+    ],
+    "a11y": { "description": "Provide nav landmarks and aria-expanded states for collapsible menus." }
+  },
+  {
+    "id": "list.item",
+    "name": "List Item",
+    "category": "Data display",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.text.muted","semantic.color.border","spacing.sm","spacing.md","font.base"],
+    "structure": ["row","icon","label","metadata"],
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Single line item" },
+      { "id": "selection", "name": "Selectable", "description": "Row with checkbox" }
+    ],
+    "a11y": { "description": "Provide role=listitem and communicate selection state via aria-selected." }
+  },
+  {
+    "id": "badge.status",
+    "name": "Status Badge",
+    "category": "Feedback",
+    "tokensUsed": ["semantic.color.success","semantic.color.warning","semantic.color.surface","spacing.xs","radius.sm","font.base"],
+    "structure": ["container","icon","label"],
+    "variants": [
+      { "id": "positive", "name": "Positive", "description": "Green success badge" },
+      { "id": "warning", "name": "Warning", "description": "Amber warning badge" }
+    ],
+    "a11y": { "description": "Use aria-live polite for async status updates when necessary." }
+  },
+  {
+    "id": "modal.dialog",
+    "name": "Modal Dialog",
+    "category": "Feedback",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.border","shadow.deep","radius.large","spacing.lg","font.base"],
+    "structure": ["overlay","dialog","header","body","footer"],
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Centered dialog" },
+      { "id": "wide", "name": "Wide", "description": "Responsive large-screen modal" }
+    ],
+    "a11y": { "description": "Trap focus, set aria-modal=true, and describe the dialog purpose via aria-labelledby." }
+  },
+  {
+    "id": "input.field",
+    "name": "Form Input",
+    "category": "Forms",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.border","semantic.color.accent","radius.sm","spacing.sm","font.base"],
+    "structure": ["label","input","hint","error"],
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Label + input + hint" },
+      { "id": "error", "name": "Error", "description": "Error state with message" }
+    ],
+    "a11y": { "description": "Associate label with input via id/for, announce errors with aria-live." }
+  },
+  {
+    "id": "table.row",
+    "name": "Table Row",
+    "category": "Data display",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.border","spacing.sm","font.mono"],
+    "structure": ["row","cell","cell","actions"],
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Static row" },
+      { "id": "hoverable", "name": "Hoverable", "description": "Row with hover elevation" }
+    ],
+    "a11y": { "description": "Ensure proper table semantics (rowgroup, headers). Announce row actions." }
+  },
+  {
+    "id": "table.simple",
+    "name": "Data Table",
+    "category": "Data display",
+    "tokensUsed": ["semantic.color.surface","semantic.color.surface.alt","semantic.color.text","semantic.color.text.muted","semantic.color.border","spacing.sm","spacing.md","font.base"],
+    "structure": ["table","thead","tbody","row","cell"],
+    "variants": [
+      { "id": "compact", "name": "Compact", "description": "Dense table for dashboards" },
+      { "id": "comfortable", "name": "Comfortable", "description": "Spacious table for detailed data" }
+    ],
+    "a11y": { "description": "Use proper table headers, scope attributes, and captions for context." }
+  },
+  {
+    "id": "avatar.cluster",
+    "name": "Avatar Cluster",
+    "category": "Avatars",
+    "tokensUsed": ["semantic.color.surface","semantic.color.border","spacing.xs","spacing.sm"],
+    "structure": ["stack","avatar","counter"],
+    "variants": [
+      { "id": "overlap", "name": "Overlap", "description": "Stacked avatars with overlap" },
+      { "id": "grid", "name": "Grid", "description": "Responsive grid of avatars" }
+    ],
+    "a11y": { "description": "Ensure aria-label summarises group membership and counts." }
+  },
+  {
+    "id": "timeline.entry",
+    "name": "Timeline Entry",
+    "category": "Data display",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.accent","semantic.color.text.muted","spacing.md","spacing.sm","font.base"],
+    "structure": ["indicator","content","meta","actions"],
+    "variants": [
+      { "id": "default", "name": "Default", "description": "Vertical timeline entry" },
+      { "id": "horizontal", "name": "Horizontal", "description": "Responsive horizontal timeline" }
+    ],
+    "a11y": { "description": "Use aria-label to describe chronological order and event status." }
+  },
+  {
+    "id": "toast.notification",
+    "name": "Toast Notification",
+    "category": "Feedback",
+    "tokensUsed": ["semantic.color.surface","semantic.color.text","semantic.color.success","semantic.color.warning","semantic.color.danger","semantic.color.info","shadow.medium","radius.medium","spacing.md","font.base"],
+    "structure": ["icon","body","actions"],
+    "variants": [
+      { "id": "success", "name": "Success", "description": "Green toast with success icon" },
+      { "id": "error", "name": "Error", "description": "Red toast with error icon" }
+    ],
+    "a11y": { "description": "Set role=alert for blocking toasts, or aria-live=polite for non blocking." }
+  },
+  {
+    "id": "chart.sparkline",
+    "name": "Sparkline Chart",
+    "category": "Data viz",
+    "tokensUsed": ["semantic.color.primary","semantic.color.accent","semantic.color.surface","semantic.color.text.muted","spacing.md","font.mono"],
+    "structure": ["label","value","chart","delta"],
+    "variants": [
+      { "id": "trend-up", "name": "Trend Up", "description": "Positive momentum sparkline" },
+      { "id": "trend-down", "name": "Trend Down", "description": "Negative momentum sparkline" }
+    ],
+    "a11y": { "description": "Provide textual summary/value for screen readers describing trend direction." }
+  },
+  {
+    "id": "stat.card",
+    "name": "Stat Card",
+    "category": "Content",
+    "tokensUsed": ["semantic.color.surface","semantic.color.surface.alt","semantic.color.text","semantic.color.text.muted","semantic.color.success","semantic.color.danger","spacing.md","spacing.sm","radius.medium","shadow.medium","font.display","font.base"],
+    "structure": ["label","value","delta","trend"],
+    "variants": [
+      { "id": "positive", "name": "Positive", "description": "Green delta badge" },
+      { "id": "negative", "name": "Negative", "description": "Red delta badge" }
+    ],
+    "a11y": { "description": "Include aria-label describing value, timeframe, and delta direction." }
   }
 ]
 

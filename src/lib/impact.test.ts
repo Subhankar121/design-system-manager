@@ -3,15 +3,15 @@ import { computeImpact } from './impact';
 import { ComponentDef, Preset, Token } from '@/types';
 
 const tokens: Token[] = [
-  { key: 'color.primary', type: 'color', value: '#0057D9' },
-  { key: 'color.surface', type: 'color', value: '#ffffff' },
+  { key: 'semantic.color.primary', type: 'color', value: '#2563eb' },
+  { key: 'semantic.color.surface', type: 'color', value: '#ffffff' },
 ];
 
 const components: ComponentDef[] = [
   {
     id: 'button.primary',
     name: 'Button',
-    tokensUsed: ['color.primary'],
+    tokensUsed: ['semantic.color.primary'],
     structure: ['button'],
   },
 ];
@@ -21,14 +21,14 @@ describe('computeImpact', () => {
     const preset: Preset = {
       id: 'demo',
       name: 'Demo',
-      globalOverrides: { 'color.primary': '#FF0000' },
-      componentOverrides: {},
+      globalOverrides: { 'semantic.color.primary': '#FF0000' },
+      components: {},
       publishedVersions: [],
     };
 
     const report = computeImpact(preset, tokens, components);
     expect(report.changedTokens).toHaveLength(1);
-    expect(report.changedTokens[0].key).toBe('color.primary');
+    expect(report.changedTokens[0].key).toBe('semantic.color.primary');
     expect(report.affectedComponents).toContain('Button');
   });
 });

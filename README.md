@@ -1,13 +1,12 @@
 ## Design System Manager Prototype
 
-Design System Manager (DSM) is a React + TypeScript + Vite prototype that demonstrates a complete design-token workflow: CRUD for tokens, component registry with previews, preset editing with overrides, live impact analysis, publishing/version history, and an SDK consumer demo — all backed by a mock API that persists data in `localStorage`.
+Design System Manager (DSM) is a React + TypeScript + Vite prototype that demonstrates a complete design-token workflow: CRUD for tokens, component registry with previews, preset editing with overrides, live impact analysis, and publishing/version history — all backed by a mock API that persists data in `localStorage`.
 
 ### Key capabilities
 - Token table with inline editing, inline validation, contrast grades (AA/AAA/Fail), usage drawer, and delete guards.
 - Component registry with accessibility warnings, drawer editor, and preset-based previews (using scoped CSS variables).
 - Preset list with duplicate/export/delete actions, dedicated editor route for global + per-component overrides, preview theme switcher, impact analysis, and publish modal with diff + accessibility report.
 - Version history with download + revert (revert creates a new published snapshot).
-- SDK demo page that fetches snapshots via `src/lib/sdk.ts`.
 - Integrations page that surfaces sync errors via reusable alert banners.
 - Accessibility: focus-visible outlines, ARIA labels, keyboard-friendly drawers/modals, WCAG contrast indicators.
 
@@ -41,7 +40,6 @@ src/
 │  ├─ mockApi.ts          # localStorage-backed API with change events & snapshots
 │  ├─ resolver.ts         # token validation, contrast ratios, CSS variable helpers
 │  ├─ impact.ts           # computeImpact(preset, tokens, components)
-│  ├─ sdk.ts              # fetchSnapshot used by SDK demo
 │  └─ *.test.ts           # unit tests
 ├─ components/
 │  ├─ AlertBanner.tsx
@@ -56,8 +54,7 @@ src/
 │  ├─ PresetsPage.tsx                  # list view (status/actions)
 │  ├─ PresetEditorPage.tsx             # editor with overrides + preview
 │  ├─ VersionsPage.tsx                 # publish history + revert
-│  ├─ IntegrationsPage.tsx             # mocked sync failure UI
-│  └─ SdkDemoPage.tsx                  # snapshot consumer example
+│  └─ IntegrationsPage.tsx             # mocked sync failure UI
 └─ seed/                               # initial JSON data
 ```
 
@@ -71,7 +68,7 @@ TypeScript types live in `src/types.ts`, covering tokens, components, presets, v
 - Data layout:
   - `dsm:tokens`, `dsm:components`, `dsm:presets`
   - `dsm:versions:<presetId>` arrays
-  - `dsm:snapshots:<snapshotId>` payloads for download/SDK consumption
+  - `dsm:snapshots:<snapshotId>` payloads for download/export flows
 - `publishPreset` auto-increments the patch segment (semver), stores immutable snapshots, and appends snapshot IDs to `preset.publishedVersions`.
 - `revertPresetVersion` clones the selected snapshot, restores overrides, and immediately publishes a new version (fulfilling “revert creates a new published snapshot”).
 
@@ -115,10 +112,9 @@ Validation rules:
 1. Edit overrides (global/component).
 2. Run impact analysis (manual button or automatically before publish) to inspect severity + affected components.
 3. Publish modal displays token/override diffs, accessibility warnings, semantic version, and release notes.
-4. Successful publish pushes to `dsm:versions:<id>` and writes a snapshot for SDK/download flows.
+4. Successful publish pushes to `dsm:versions:<id>` and writes a snapshot for download flows.
 
-### SDK demo & integrations
-- `/sdk-demo`: choose preset/version → fetch snapshot via `fetchSnapshot`, display preview, and render raw JSON so teams can see what an SDK consumer would receive.
+### Integrations
 - `/integrations`: shows how failed syncs surface via `AlertBanner`, with retry button toggling state.
 
 ---
@@ -152,9 +148,7 @@ Manual smoke checklist (recommended before showcasing):
    - Download snapshot JSON and inspect contents.
 4. **Revert**
    - On versions page revert to an older snapshot → confirm a new version is created and preview updates.
-5. **SDK demo**
-   - Visit `/sdk-demo`, select `brand_x`, load snapshot → preview matches published version.
-6. **Accessibility checks**
+5. **Accessibility checks**
    - Invalid hex shows inline errors, publish button disabled with explanatory tooltip.
    - Color tokens display AA/AAA/Fail chips based on contrast vs `color.surface`.
 
@@ -169,12 +163,10 @@ Manual smoke checklist (recommended before showcasing):
 
 ---
 
-## Resetting seeds, integrations & SDK tips
+## Resetting seeds & integrations tips
 
 - All mutations dispatch `dsm:change` so multiple tabs stay in sync.
 - Integrations page demonstrates error banners; toggle the mock failure via the Retry button.
-- SDK demo uses the same snapshot storage as download/revert flows — external consumers can mimic the same call pattern.
-
 ---
 
 Happy designing!

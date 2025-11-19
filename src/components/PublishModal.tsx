@@ -1,13 +1,13 @@
-import { ComponentDef, ImpactReport, Preset, PresetVersion, Token, ValidationIssue } from '@/types';
+import { ComponentDef, ImpactReport, Theme, ThemeVersion, Token, ValidationIssue } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
 import { resolveTokens } from '@/lib/resolver';
 
 interface PublishModalProps {
   isOpen: boolean;
-  preset: Preset;
+  theme: Theme;
   tokens: Token[];
   components: ComponentDef[];
-  latestVersion: PresetVersion | null;
+  latestVersion: ThemeVersion | null;
   validations: ValidationIssue[];
   impact: ImpactReport | null;
   onClose: () => void;
@@ -16,7 +16,7 @@ interface PublishModalProps {
 
 export function PublishModal({
   isOpen,
-  preset,
+  theme,
   tokens,
   components,
   latestVersion,
@@ -43,7 +43,7 @@ export function PublishModal({
 
   const { changedTokens, changedOverrides } = useMemo(() => {
     const previous = latestVersion?.snapshot?.tokens || {};
-    const current = resolveTokens(tokens, preset);
+    const current = resolveTokens(tokens, theme);
 
     const tokenChanges = Object.keys({ ...current, ...previous })
       .map((key) => {
@@ -54,14 +54,14 @@ export function PublishModal({
       })
       .filter(Boolean) as { key: string; from?: string; to?: string }[];
 
-    const previousOverrides = latestVersion?.snapshot?.componentOverrides ?? {};
+    const previousOverrides = latestVersion?.snapshot?.components ?? {};
     const overrideChanges = Object.keys({
       ...previousOverrides,
-      ...preset.componentOverrides,
+      ...theme.components,
     })
       .map((componentId) => {
         const before = previousOverrides[componentId] || {};
-        const after = preset.componentOverrides[componentId] || {};
+        const after = theme.components[componentId] || {};
         const diffs = Object.keys({ ...before, ...after }).filter((tokenKey) => before[tokenKey] !== after[tokenKey]);
         if (diffs.length === 0) return null;
         const componentName = components.find((c) => c.id === componentId)?.name || componentId;
@@ -82,7 +82,7 @@ export function PublishModal({
     }[];
 
     return { changedTokens: tokenChanges, changedOverrides: overrideChanges };
-  }, [latestVersion, preset, components, tokens]);
+  }, [latestVersion, theme, components, tokens]);
 
   if (!isOpen) return null;
 
@@ -111,9 +111,9 @@ export function PublishModal({
           <div className="p-6 space-y-6">
             <header className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs uppercase text-gray-500">Publish preset</p>
+                <p className="text-xs uppercase text-gray-500">Publish theme</p>
                 <h2 className="text-2xl font-semibold text-gray-900">
-                  {preset.name} · v{nextVersion}
+                  {theme.name} · v{nextVersion}
                 </h2>
                 <p className="text-sm text-gray-500">
                   Latest published version: {latestVersion?.version ?? 'none'}
@@ -147,7 +147,7 @@ export function PublishModal({
                   <div>
                     <p className="text-gray-500">Overrides</p>
                     <p className="text-lg font-semibold">
-                      {Object.keys(preset.componentOverrides).length} components
+                      {Object.keys(theme.components).length} components
                     </p>
                   </div>
                 </div>

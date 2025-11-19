@@ -21,7 +21,9 @@ export function ComponentCard({ component, onClick }: ComponentCardProps) {
       aria-label={`View component ${component.name}`}
     >
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{component.name}</h3>
-      <p className="text-sm text-gray-600 mb-4">{component.a11y.description}</p>
+      <p className="text-sm text-gray-600 mb-4">
+        {component.a11y?.description || 'No accessibility description available.'}
+      </p>
       
       <div className="space-y-2">
         <div>

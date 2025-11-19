@@ -38,7 +38,7 @@ export function ImpactModal({ isOpen, onClose, report }: ImpactModalProps) {
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
                 <p className="text-sm text-gray-500">Affected components</p>
-                <p className="text-2xl font-semibold text-gray-900">{report.affectedComponents.length}</p>
+                <p className="text-2xl font-semibold text-gray-900">{report.componentSummaries?.length ?? 0}</p>
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
                 <p className="text-sm text-gray-500">Severity</p>
@@ -60,7 +60,10 @@ export function ImpactModal({ isOpen, onClose, report }: ImpactModalProps) {
                     >
                       <div>
                         <p className="font-medium text-gray-900">{change.key}</p>
-                        <p className="text-xs text-gray-500">from {change.from ?? 'n/a'}</p>
+                        <p className="text-xs text-gray-500">
+                          from {change.from ?? 'n/a'} · affects {change.components.length} component
+                          {change.components.length === 1 ? '' : 's'}
+                        </p>
                       </div>
                       <span className="text-indigo-600 font-semibold">{change.to ?? 'n/a'}</span>
                     </li>
@@ -70,19 +73,48 @@ export function ImpactModal({ isOpen, onClose, report }: ImpactModalProps) {
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Affected components</h3>
-              {report.affectedComponents.length === 0 && (
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Component impact</h3>
+              {(!report.componentSummaries || report.componentSummaries.length === 0) && (
                 <p className="text-sm text-gray-500">No components are impacted by this change.</p>
               )}
-              {report.affectedComponents.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {report.affectedComponents.map((component) => (
-                    <span
-                      key={component}
-                      className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold"
+              {report.componentSummaries && report.componentSummaries.length > 0 && (
+                <div className="space-y-3">
+                  {report.componentSummaries.map((summary) => (
+                    <div
+                      key={summary.id}
+                      className="border border-gray-200 rounded-lg p-3 text-sm flex flex-col gap-2"
                     >
-                      {component}
-                    </span>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900">{summary.name}</p>
+                          <p className="text-xs text-gray-500">{summary.structure.join(' • ')}</p>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            summary.severity === 'high'
+                              ? 'bg-red-100 text-red-700'
+                              : summary.severity === 'medium'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}
+                        >
+                          {summary.severity} impact
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {summary.tokensImpacted.map((token) => (
+                          <span
+                            key={token}
+                            className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs"
+                          >
+                            {token}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Variants affected: {summary.variantCount}
+                      </p>
+                    </div>
                   ))}
                 </div>
               )}

@@ -1,0 +1,109 @@
+[
+  {
+    "id": "default",
+    "name": "Default",
+    "globalOverrides": {},
+    "components": {},
+    "publishedVersions": []
+  },
+  {
+    "id": "brand_x",
+    "name": "Brand X",
+    "globalOverrides": {
+      "semantic.color.primary": "#FF7A59",
+      "semantic.color.secondary": "#F97316",
+      "semantic.color.accent": "#FB923C",
+      "semantic.color.success": "#10b981",
+      "semantic.color.warning": "#f59e0b",
+      "semantic.color.danger": "#ef4444",
+      "semantic.color.info": "#0ea5e9",
+      "semantic.color.surface": "#ffffff",
+      "semantic.color.surface.alt": "#fff7ed",
+      "semantic.color.text": "#1c1917",
+      "semantic.color.text.muted": "#78716c",
+      "semantic.color.border": "#fed7aa",
+      "semantic.radius.sm": "6px",
+      "semantic.radius.md": "12px",
+      "semantic.radius.lg": "20px",
+      "semantic.spacing.xs": "4px",
+      "semantic.spacing.sm": "8px",
+      "semantic.spacing.md": "16px",
+      "semantic.spacing.lg": "32px",
+      "semantic.spacing.xl": "48px",
+      "semantic.shadow.xs": "0 2px 4px rgba(251,146,60,0.1)",
+      "semantic.shadow.medium": "0 8px 24px rgba(249,115,22,0.15)",
+      "semantic.shadow.deep": "0 25px 55px rgba(249,115,22,0.2)",
+      "semantic.shadow.large": "0 35px 65px rgba(249,115,22,0.25)"
+    },
+    "components": {
+      "card.primary": {
+        "shadow.medium": "0 6px 18px rgba(249,115,22,0.12)",
+        "radius.medium": "16px"
+      },
+      "button.primary": {
+        "radius.medium": "12px",
+        "shadow.medium": "0 4px 12px rgba(255,122,89,0.3)"
+      },
+      "input.field": {
+        "radius.sm": "8px",
+        "semantic.color.border": "#fed7aa"
+      },
+      "badge.status": {
+        "radius.sm": "12px"
+      }
+    },
+    "publishedVersions": []
+  },
+  {
+    "id": "brand_y",
+    "name": "Brand Y",
+    "globalOverrides": {
+      "semantic.color.primary": "#0ea5e9",
+      "semantic.color.secondary": "#06b6d4",
+      "semantic.color.accent": "#14b8a6",
+      "semantic.color.success": "#10b981",
+      "semantic.color.warning": "#f59e0b",
+      "semantic.color.danger": "#ef4444",
+      "semantic.color.info": "#3b82f6",
+      "semantic.color.surface": "#ffffff",
+      "semantic.color.surface.alt": "#f0fdfa",
+      "semantic.color.text": "#0f172a",
+      "semantic.color.text.muted": "#475569",
+      "semantic.color.border": "#cbd5e1",
+      "semantic.radius.sm": "2px",
+      "semantic.radius.md": "4px",
+      "semantic.radius.lg": "8px",
+      "semantic.spacing.xs": "4px",
+      "semantic.spacing.sm": "8px",
+      "semantic.spacing.md": "16px",
+      "semantic.spacing.lg": "32px",
+      "semantic.spacing.xl": "48px",
+      "semantic.shadow.xs": "0 1px 2px rgba(14,165,233,0.08)",
+      "semantic.shadow.medium": "0 4px 12px rgba(14,165,233,0.12)",
+      "semantic.shadow.deep": "0 12px 32px rgba(14,165,233,0.18)",
+      "semantic.shadow.large": "0 20px 48px rgba(14,165,233,0.22)"
+    },
+    "components": {
+      "card.primary": {
+        "shadow.medium": "0 4px 12px rgba(14,165,233,0.1)",
+        "radius.medium": "6px"
+      },
+      "button.primary": {
+        "radius.medium": "4px",
+        "shadow.medium": "0 2px 8px rgba(14,165,233,0.25)"
+      },
+      "input.field": {
+        "radius.sm": "4px",
+        "semantic.color.border": "#94a3b8"
+      },
+      "navbar.global": {
+        "spacing.md": "20px"
+      },
+      "modal.dialog": {
+        "shadow.deep": "0 12px 32px rgba(14,165,233,0.2)",
+        "radius.large": "8px"
+      }
+    },
+    "publishedVersions": []
+  }
+]

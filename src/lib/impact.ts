@@ -1,4 +1,4 @@
-import { ComponentDef, ImpactReport, Preset, Token, TokenValueMap } from '@/types';
+import { ComponentDef, ImpactComponentSummary, ImpactReport, Theme, Token, TokenValueMap } from '@/types';
 import { resolveTokens } from './resolver';
 
 const mapTokens = (tokens: Token[]): TokenValueMap =>
@@ -8,12 +8,12 @@ const mapTokens = (tokens: Token[]): TokenValueMap =>
   }, {});
 
 export const computeImpact = (
-  presetDraft: Preset,
+  themeDraft: Theme,
   baseTokens: Token[],
   components: ComponentDef[]
 ): ImpactReport => {
   const baseMap = mapTokens(baseTokens);
-  const resolved = resolveTokens(baseTokens, presetDraft);
+  const resolved = resolveTokens(baseTokens, themeDraft);
 
   const changedTokens = Object.keys({ ...baseMap, ...resolved })
     .map((key) => {
@@ -29,21 +29,34 @@ export const computeImpact = (
     })
     .filter(Boolean) as ImpactReport['changedTokens'];
 
-  const affectedComponents = Array.from(
-    new Set(changedTokens.flatMap((change) => change.components))
-  );
+  const affectedComponents = Array.from(new Set(changedTokens.flatMap((change) => change.components)));
+
+  const changedKeySet = new Set(changedTokens.map((c) => c.key));
+  const componentSummaries: ImpactComponentSummary[] = components
+    .filter((c) => c.tokensUsed.some((t) => changedKeySet.has(t)))
+    .map((c) => {
+      const tokensImpacted = c.tokensUsed.filter((t) => changedKeySet.has(t));
+      const variantCount = c.variants?.length ?? 1;
+      const severity =
+        tokensImpacted.length >= 3 ? 'high' : tokensImpacted.length === 2 ? 'medium' : 'low';
+      return {
+        id: c.id,
+        name: c.name,
+        structure: c.structure,
+        tokensImpacted,
+        variantCount,
+        severity,
+      };
+    });
 
   const severity =
-    affectedComponents.length > 4
-      ? 'high'
-      : affectedComponents.length > 1
-      ? 'medium'
-      : 'low';
+    affectedComponents.length > 8 ? 'high' : affectedComponents.length > 3 ? 'medium' : 'low';
 
   return {
     changedTokens,
     affectedComponents,
     severity,
+    componentSummaries,
   };
 };
 

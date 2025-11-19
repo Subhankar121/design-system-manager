@@ -1,4 +1,4 @@
-import { ComponentDef, Preset, Token, TokenValueMap } from '@/types';
+import { ComponentDef, Theme, Token, TokenValueMap } from '@/types';
 
 const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 const sizeRegex = /^\d+(\.\d+)?(px|rem|em|%)$/;
@@ -36,14 +36,14 @@ export const validateTokenValue = (token: Token): string | null => {
   }
 };
 
-export const resolveTokens = (baseTokens: Token[], preset?: Preset): TokenValueMap => {
+export const resolveTokens = (baseTokens: Token[], theme?: Theme): TokenValueMap => {
   const resolved = baseTokens.reduce<Record<string, string>>((acc, token) => {
     acc[token.key] = token.value;
     return acc;
   }, {});
 
-  if (preset) {
-    Object.entries(preset.globalOverrides || {}).forEach(([key, value]) => {
+  if (theme) {
+    Object.entries(theme.globalOverrides || {}).forEach(([key, value]) => {
       resolved[key] = value;
     });
   }
@@ -54,14 +54,14 @@ export const resolveTokens = (baseTokens: Token[], preset?: Preset): TokenValueM
 export const resolveComponentTokens = (
   component: ComponentDef,
   resolvedTokens: TokenValueMap,
-  preset?: Preset
+  theme?: Theme
 ): TokenValueMap => {
   const componentMap: TokenValueMap = {};
   component.tokensUsed.forEach((key) => {
     componentMap[key] = resolvedTokens[key];
   });
 
-  const overrides = preset?.componentOverrides?.[component.id];
+  const overrides = theme?.components?.[component.id];
   if (overrides) {
     Object.entries(overrides).forEach(([key, value]) => {
       componentMap[key] = value;
@@ -113,5 +113,17 @@ export const applyTokensToElement = (node: HTMLElement, tokens: TokenValueMap) =
   Object.entries(tokens).forEach(([key, value]) => {
     node.style.setProperty(tokenToCSSVar(key), value);
   });
+};
+
+// Attempts to infer a base token alias (e.g., blue.100) for a given resolved value (e.g., #2270ee)
+// Returns the base token key if a unique match is found, otherwise null.
+export const findBaseAliasForValue = (value: string, baseTokens: Token[]): string | null => {
+  if (!value) return null;
+  const normalized = value.trim().toLowerCase();
+  const candidates = baseTokens.filter(
+    (t) => !t.key.startsWith('semantic.') && String(t.value).trim().toLowerCase() === normalized
+  );
+  if (candidates.length === 1) return candidates[0].key;
+  return null;
 };
 

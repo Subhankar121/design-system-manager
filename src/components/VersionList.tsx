@@ -1,11 +1,11 @@
-import { PresetVersion } from '@/types';
+import { ThemeVersion } from '@/types';
 import { useState } from 'react';
 
 interface VersionListProps {
-  versions: PresetVersion[];
+  versions: ThemeVersion[];
   onRevert: (snapshotId: string) => void;
-  onDownload: (version: PresetVersion) => void;
-  onViewDiff?: (version: PresetVersion) => void;
+  onDownload: (version: ThemeVersion) => void;
+  onViewDiff?: (version: ThemeVersion) => void;
 }
 
 export function VersionList({ versions, onRevert, onDownload, onViewDiff }: VersionListProps) {
@@ -19,6 +19,11 @@ export function VersionList({ versions, onRevert, onDownload, onViewDiff }: Vers
     <div className="space-y-4">
       {versions.map((version) => {
         const createdAt = new Date(version.createdAt).toLocaleString();
+        const globalCount = Object.keys(version.snapshot.tokens || {}).length;
+        const componentOverrideCount = Object.values(version.snapshot.components || {}).reduce(
+          (sum, overrides: any) => sum + Object.keys(overrides || {}).length,
+          0
+        );
         return (
           <article
             key={version.snapshotId}
@@ -32,6 +37,14 @@ export function VersionList({ versions, onRevert, onDownload, onViewDiff }: Vers
                 <p className="text-sm text-gray-500">
                   Published by {version.createdBy} on {createdAt}
                 </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400" /> {globalCount} global tokens
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400" /> {componentOverrideCount} component overrides
+                  </span>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {onViewDiff && (
@@ -77,11 +90,20 @@ export function VersionList({ versions, onRevert, onDownload, onViewDiff }: Vers
               </div>
             </div>
 
-            {version.changelog?.notes && (
-              <p className="mt-3 text-sm text-gray-700">
-                <span className="font-semibold text-gray-900">Notes:</span> {version.changelog.notes}
-              </p>
-            )}
+            {(() => {
+              const notes =
+                typeof version.changelog === 'object' &&
+                version.changelog !== null &&
+                'notes' in version.changelog
+                  ? (version.changelog as { notes?: unknown }).notes
+                  : undefined;
+              return typeof notes === 'string' && notes.trim() ? (
+                <p className="mt-3 text-sm text-gray-700">
+                  <span className="font-semibold text-gray-900">Notes:</span> {notes}
+                </p>
+              ) : null;
+            })()}
+
 
             <details className="mt-4">
               <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-2 py-1">

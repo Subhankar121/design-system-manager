@@ -3,14 +3,13 @@ import { ToastProvider } from '@/hooks/useToast';
 import { Dashboard } from '@/pages/Dashboard';
 import { TokensPage } from '@/pages/TokensPage';
 import { ComponentsPage } from '@/pages/ComponentsPage';
-import { PresetsPage } from '@/pages/PresetsPage';
-import { PresetEditorPage } from '@/pages/PresetEditorPage';
+import { ThemesPage } from '@/pages/ThemesPage';
+import { ThemeEditorPage } from '@/pages/ThemeEditorPage';
 import { VersionsPage } from '@/pages/VersionsPage';
 import { IntegrationsPage } from '@/pages/IntegrationsPage';
-import { SdkDemoPage } from '@/pages/SdkDemoPage';
 import { useEffect } from 'react';
 import { applyTokensToElement, resolveTokens } from '@/lib/resolver';
-import { getTokens, getPresets, initSeedDataIfNeeded } from '@/lib/mockApi';
+import { getTokens, getThemes, initSeedDataIfNeeded } from '@/lib/mockApi';
 
 function Navigation() {
   const location = useLocation();
@@ -19,9 +18,8 @@ function Navigation() {
     { path: '/', label: 'Dashboard' },
     { path: '/tokens', label: 'Tokens' },
     { path: '/components', label: 'Components' },
-    { path: '/presets', label: 'Presets' },
+    { path: '/themes', label: 'Themes' },
     { path: '/integrations', label: 'Integrations' },
-    { path: '/sdk-demo', label: 'SDK Demo' },
   ];
 
   return (
@@ -81,9 +79,9 @@ function AppContent() {
         await initSeedDataIfNeeded();
       }
       const tokens = await getTokens();
-      const presets = await getPresets();
-      const defaultPreset = presets.find((preset) => preset.id === 'default') || null;
-      const resolved = resolveTokens(tokens, defaultPreset || undefined);
+      const themes = await getThemes();
+      const defaultTheme = themes.find((theme) => theme.id === 'default') || null;
+      const resolved = resolveTokens(tokens, defaultTheme || undefined);
       applyTokensToElement(document.documentElement, resolved);
     };
     syncSeeds();
@@ -97,11 +95,10 @@ function AppContent() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/tokens" element={<TokensPage />} />
           <Route path="/components" element={<ComponentsPage />} />
-          <Route path="/presets" element={<PresetsPage />} />
-          <Route path="/presets/:id/edit" element={<PresetEditorPage />} />
-          <Route path="/presets/:id/versions" element={<VersionsPage />} />
+          <Route path="/themes" element={<ThemesPage />} />
+          <Route path="/themes/:id/edit" element={<ThemeEditorPage />} />
+          <Route path="/themes/:id/versions" element={<VersionsPage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
-          <Route path="/sdk-demo" element={<SdkDemoPage />} />
         </Routes>
       </main>
     </div>
