@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { AlertBanner } from '@/components/AlertBanner';
+import { PageHeader } from '@/components/PageHeader';
+import { SectionHeader } from '@/components/SectionHeader';
+import { HelpBox } from '@/components/HelpBox';
 
 export function IntegrationsPage() {
   const [syncFailed, setSyncFailed] = useState(true);
@@ -121,28 +124,46 @@ export function IntegrationsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-xs uppercase text-gray-500">Connections</p>
-        <h1 className="text-3xl font-bold text-gray-900">Integrations</h1>
-        <p className="text-sm text-gray-500">
-          Connect DSM to design and engineering tools. Mock sync failure illustrates error handling.
-        </p>
-      </header>
+    <div className="space-y-8">
+      <PageHeader
+        badge="Ecosystem"
+        title="Integrations"
+        description="Connect your design system to your tools and workflows. Automate synchronization, publishing, and distribution across your organization."
+      />
+
+      <HelpBox title="Why integrate?" variant="tip">
+        <p className="mb-2">Integrations keep your design system synchronized across tools:</p>
+        <ul className="space-y-1 text-sm list-disc list-inside">
+          <li><strong>Figma:</strong> Pull design variables directly from your Figma libraries</li>
+          <li><strong>GitHub Actions:</strong> Automate publishing and validation in your CI/CD pipeline</li>
+          <li><strong>Storybook:</strong> Showcase components with live theme switching</li>
+        </ul>
+        <p className="mt-2 text-sm">💡 Click any integration card below to see setup instructions and benefits.</p>
+      </HelpBox>
 
       {syncFailed ? (
         <AlertBanner
           type="error"
-          title="Sync failed"
-          message="Figma design tokens could not be synchronized. Please retry."
+          title="Figma sync failed"
+          message="Unable to synchronize design tokens from Figma. Check your API credentials and network connection."
           actionLabel="Retry sync"
           onAction={handleRetry}
         />
       ) : (
-        <AlertBanner type="success" message="Integration sync completed successfully." />
+        <AlertBanner 
+          type="success" 
+          title="Sync successful"
+          message="All integrations are up to date. Design tokens are synchronized across platforms." 
+        />
       )}
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section>
+        <SectionHeader
+          title="Available Integrations"
+          description="Click to expand and configure each integration"
+          badge={`${cards.length}`}
+        />
+        <div className="grid gap-4 md:grid-cols-2">
         {cards.map((card) => {
           const isExpanded = expandedCard === card.id;
           return (
@@ -192,6 +213,7 @@ export function IntegrationsPage() {
             </article>
           );
         })}
+        </div>
       </section>
     </div>
   );

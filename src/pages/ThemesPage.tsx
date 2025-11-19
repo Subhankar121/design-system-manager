@@ -10,7 +10,8 @@ import {
   saveThemeDraft,
 } from '@/lib/mockApi';
 import { useToast } from '@/hooks/useToast';
-import { AlertBanner } from '@/components/AlertBanner';
+import { PageHeader } from '@/components/PageHeader';
+import { HelpBox } from '@/components/HelpBox';
 
 export function ThemesPage() {
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -76,26 +77,31 @@ export function ThemesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase text-gray-500">Themes</p>
-          <h1 className="text-3xl font-bold text-gray-900">Themes</h1>
-          <p className="text-sm text-gray-500">Manage theme drafts, publishing, and version history.</p>
-        </div>
-        <Link
-          to="/themes/default/edit"
-          className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          Open default theme
-        </Link>
-      </header>
-
-      <AlertBanner
-        type="info"
-        title="Publishing workflow"
-        message="Edit themes, analyze impact, publish to create immutable versions, and revert anytime."
+    <div className="space-y-8">
+      <PageHeader
+        badge="Theme Management"
+        title="Themes"
+        description="Create theme variations for different brands, products, or contexts. Each theme can override semantic tokens while inheriting from your base system."
+        actions={
+          <Link
+            to="/themes/default/edit"
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Edit default theme
+          </Link>
+        }
       />
+
+      <HelpBox title="How themes work" variant="info">
+        <p className="mb-2">Themes let you customize your design system for different use cases:</p>
+        <ul className="space-y-1 text-sm list-disc list-inside">
+          <li><strong>Override semantic tokens:</strong> Change color.primary, spacing, or typography for specific brands</li>
+          <li><strong>Component-specific overrides:</strong> Fine-tune individual components without affecting others</li>
+          <li><strong>Version control:</strong> Publish immutable snapshots and roll back if needed</li>
+          <li><strong>Impact analysis:</strong> See which components are affected before publishing</li>
+        </ul>
+        <p className="mt-2 text-sm">💡 Start with the default theme, then duplicate and customize for each brand.</p>
+      </HelpBox>
 
       <div className="grid gap-4 md:grid-cols-2">
         {themes.map((theme) => {
