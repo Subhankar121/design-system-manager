@@ -111,46 +111,83 @@ export function PublishModal({
           <div className="p-6 space-y-6">
             <header className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs uppercase text-gray-500">Publish theme</p>
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  {theme.name} · v{nextVersion}
+                <p className="text-xs uppercase text-indigo-600 font-semibold tracking-wide">Publish Theme</p>
+                <h2 className="text-2xl font-bold text-gray-900 mt-1">
+                  {theme.name}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  Latest published version: {latestVersion?.version ?? 'none'}
+                <p className="text-sm text-gray-600 mt-1">
+                  Publishing version <span className="font-semibold text-gray-900">{nextVersion}</span>
+                  {latestVersion && <> (current: {latestVersion.version})</>}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
-                aria-label="Close publish modal"
+                className="text-2xl text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded p-1"
+                aria-label="Close"
               >
                 ×
               </button>
             </header>
 
-            {impact && (
-              <section className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Impact summary</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-gray-500">Changed tokens</p>
-                    <p className="text-lg font-semibold">{impact.changedTokens.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Affected components</p>
-                    <p className="text-lg font-semibold">{impact.affectedComponents.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Severity</p>
-                    <p className="text-lg font-semibold capitalize">{impact.severity}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Overrides</p>
-                    <p className="text-lg font-semibold">
-                      {Object.keys(theme.components).length} components
-                    </p>
+            {hasBlockingIssues && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-red-900 mb-1">Cannot publish: {blockingIssues.length} error{blockingIssues.length > 1 ? 's' : ''} must be fixed</h3>
+                    <p className="text-sm text-red-700">Fix all validation errors before publishing to prevent breaking changes in production.</p>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {impact && (
+              <section className={`rounded-lg p-5 ${
+                impact.severity === 'high' ? 'bg-orange-50 border border-orange-200' : 
+                impact.severity === 'medium' ? 'bg-yellow-50 border border-yellow-200' : 
+                'bg-green-50 border border-green-200'
+              }`}>
+                <div className="flex items-center gap-2 mb-3">
+                  {impact.severity === 'high' ? (
+                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                  <h3 className="text-sm font-semibold text-gray-900">Impact Analysis</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="bg-white rounded-md p-3 border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Changed tokens</p>
+                    <p className="text-2xl font-bold text-gray-900">{impact.changedTokens.length}</p>
+                  </div>
+                  <div className="bg-white rounded-md p-3 border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Affected components</p>
+                    <p className="text-2xl font-bold text-gray-900">{impact.affectedComponents.length}</p>
+                  </div>
+                  <div className="bg-white rounded-md p-3 border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Impact level</p>
+                    <p className={`text-lg font-semibold capitalize ${
+                      impact.severity === 'high' ? 'text-orange-700' : 
+                      impact.severity === 'medium' ? 'text-yellow-700' : 
+                      'text-green-700'
+                    }`}>{impact.severity}</p>
+                  </div>
+                  <div className="bg-white rounded-md p-3 border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Component overrides</p>
+                    <p className="text-2xl font-bold text-gray-900">{Object.keys(theme.components).length}</p>
+                  </div>
+                </div>
+                {impact.severity === 'high' && (
+                  <p className="mt-3 text-xs text-orange-800">
+                    ⚠️ High impact: Review changes carefully before publishing to production
+                  </p>
+                )}
               </section>
             )}
 
@@ -218,8 +255,8 @@ export function PublishModal({
             )}
 
             <section>
-              <label htmlFor="release-notes" className="text-sm font-medium text-gray-700 mb-1 block">
-                Release notes
+              <label htmlFor="release-notes" className="text-sm font-medium text-gray-900 mb-2 block">
+                Release notes (optional)
               </label>
               <textarea
                 id="release-notes"
