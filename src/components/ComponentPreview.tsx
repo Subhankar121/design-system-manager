@@ -1,6 +1,6 @@
 import { ComponentDef, Theme, Token } from '@/types';
-import { resolveComponentTokens, resolveTokens } from '@/lib/resolver';
-import { PreviewCanvas } from './PreviewCanvas';
+import { resolveTokens } from '@/lib/resolver';
+import { MuiPreview } from './MuiPreview';
 
 interface ComponentPreviewProps {
   component: ComponentDef;
@@ -10,7 +10,6 @@ interface ComponentPreviewProps {
 
 export function ComponentPreview({ component, theme, tokens }: ComponentPreviewProps) {
   const resolved = resolveTokens(tokens, theme || undefined);
-  const componentTokens = resolveComponentTokens(component, resolved, theme || undefined);
-  return <PreviewCanvas tokens={componentTokens} component={component} />;
+  const overrides = theme?.components?.[component.id];
+  return <MuiPreview component={component} tokens={resolved} overrides={overrides} />;
 }
-

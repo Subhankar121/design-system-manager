@@ -7,6 +7,7 @@ import { ThemesPage } from '@/pages/ThemesPage';
 import { ThemeEditorPage } from '@/pages/ThemeEditorPage';
 import { VersionsPage } from '@/pages/VersionsPage';
 import { IntegrationsPage } from '@/pages/IntegrationsPage';
+import { DocsPage } from '@/pages/DocsPage';
 import { useEffect } from 'react';
 import { applyTokensToElement, resolveTokens } from '@/lib/resolver';
 import { getTokens, getThemes, initSeedDataIfNeeded } from '@/lib/mockApi';
@@ -18,6 +19,7 @@ function Navigation() {
     { path: '/', label: 'Dashboard' },
     { path: '/tokens', label: 'Tokens' },
     { path: '/components', label: 'Components' },
+    { path: '/docs', label: 'Docs' },
     { path: '/themes', label: 'Themes' },
     { path: '/integrations', label: 'Integrations' },
   ];
@@ -95,6 +97,7 @@ function AppContent() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/tokens" element={<TokensPage />} />
           <Route path="/components" element={<ComponentsPage />} />
+          <Route path="/docs" element={<DocsPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/themes/:id/edit" element={<ThemeEditorPage />} />
           <Route path="/themes/:id/versions" element={<VersionsPage />} />

@@ -10,6 +10,10 @@
     "reset-seed": "node scripts/reset-seed.mjs"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.1.1",
+    "@mui/material": "^9.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
@@ -29,4 +33,3 @@
     "vitest": "^1.0.4"
   }
 }
-

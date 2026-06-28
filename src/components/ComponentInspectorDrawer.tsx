@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ComponentDef, Token, TokenValueMap } from '@/types';
-import { PreviewCanvas } from '@/components/PreviewCanvas';
+import { MuiPreview } from '@/components/MuiPreview';
 import { resolveComponentTokens } from '@/lib/resolver';
 
 interface Props {
@@ -305,12 +305,11 @@ export function ComponentInspectorDrawer({
                 </div>
               </div>
             </div>
-            <PreviewCanvas 
-              tokens={previewTokens} 
-              component={component} 
-              variantId={currentVariant} 
+            <MuiPreview
+              tokens={resolvedTokens}
+              component={component}
+              variantId={currentVariant}
               viewport={currentViewport}
-              slotSelections={component ? slotSelections[component.id] : undefined}
             />
             {currentVariant && (
               <p className="text-xs text-gray-500">

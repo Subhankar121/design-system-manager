@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ComponentDef, Theme, Token } from '@/types';
-import { PreviewCanvas } from './PreviewCanvas';
+import { MuiPreview } from './MuiPreview';
 import { resolveComponentTokens, tokenToCSSVar } from '@/lib/resolver';
 import { ColorTokenSelect } from './ColorTokenSelect';
 
@@ -182,17 +182,10 @@ export function ThemeEditor({
             )}
 
             <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-              <PreviewCanvas
-                tokens={
-                  selectedComponent
-                    ? resolveComponentTokens(
-                        selectedComponent,
-                        previewTokens,
-                        previewTheme || undefined
-                      )
-                    : previewTokens
-                }
+              <MuiPreview
+                tokens={previewTokens}
                 component={selectedComponent}
+                overrides={selectedComponent ? previewTheme?.components?.[selectedComponent.id] : undefined}
                 variantId={selectedVariantId}
               />
             </div>
