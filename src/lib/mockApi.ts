@@ -16,7 +16,7 @@ const STORAGE_KEYS = {
   themes: 'dsm:themes',
 };
 
-const SEED_VERSION = '2025-semantic-palette-v1';
+const SEED_VERSION = '2026-dark-mode-v1';
 
 const VERSION_PREFIX = 'dsm:versions:';
 export const SNAPSHOT_STORAGE_PREFIX = 'dsm:snapshots:';

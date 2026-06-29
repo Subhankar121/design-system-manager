@@ -8,6 +8,7 @@ export interface Token {
   key: string;
   type: TokenType;
   value: string;
+  valueDark?: string;
   description?: string;
   locked?: boolean;
   contrastAgainst?: string;
@@ -37,6 +38,7 @@ export interface Theme {
   id: string;
   name: string;
   globalOverrides: Record<string, string>;
+  darkOverrides?: Record<string, string>;
   components: Record<string, Record<string, string>>;
   publishedVersions: string[];
 }

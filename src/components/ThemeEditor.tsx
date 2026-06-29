@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ComponentDef, Theme, Token } from '@/types';
 import { MuiPreview } from './MuiPreview';
-import { resolveComponentTokens, tokenToCSSVar } from '@/lib/resolver';
+import { resolveComponentTokens, resolveTokens, tokenToCSSVar } from '@/lib/resolver';
 import { ColorTokenSelect } from './ColorTokenSelect';
 
 interface ThemeEditorProps {
@@ -36,6 +36,11 @@ export function ThemeEditor({
   onOpenGlobalOverrides,
 }: ThemeEditorProps) {
   const [componentVariantMap, setComponentVariantMap] = useState<Record<string, string | null>>({});
+  const [colorMode, setColorMode] = useState<'light' | 'dark'>('light');
+  const previewTokensForMode = useMemo(
+    () => (colorMode === 'dark' ? resolveTokens(tokens, previewTheme || undefined, 'dark') : previewTokens),
+    [colorMode, tokens, previewTheme, previewTokens]
+  );
   const [activeTokenTab, setActiveTokenTab] = useState<'all'|'color'|'size'|'spacing'|'shadow'|'font'>('all');
   const tokenMap = useMemo(
     () =>
@@ -181,12 +186,29 @@ export function ThemeEditor({
               </div>
             )}
 
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-gray-500">Preview</span>
+              <div className="inline-flex rounded-md border border-gray-200 p-0.5 bg-gray-50" role="group" aria-label="Color mode">
+                {(['light', 'dark'] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setColorMode(m)}
+                    className={`px-2.5 py-1 rounded text-xs font-medium capitalize transition-colors ${
+                      colorMode === m ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
               <MuiPreview
-                tokens={previewTokens}
+                tokens={previewTokensForMode}
                 component={selectedComponent}
                 overrides={selectedComponent ? previewTheme?.components?.[selectedComponent.id] : undefined}
                 variantId={selectedVariantId}
+                mode={colorMode}
               />
             </div>
 

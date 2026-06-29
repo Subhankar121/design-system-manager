@@ -36,14 +36,23 @@ export const validateTokenValue = (token: Token): string | null => {
   }
 };
 
-export const resolveTokens = (baseTokens: Token[], theme?: Theme): TokenValueMap => {
+export type ThemeMode = 'light' | 'dark';
+
+export const resolveTokens = (
+  baseTokens: Token[],
+  theme?: Theme,
+  mode: ThemeMode = 'light'
+): TokenValueMap => {
   const resolved = baseTokens.reduce<Record<string, string>>((acc, token) => {
-    acc[token.key] = token.value;
+    acc[token.key] = mode === 'dark' && token.valueDark ? token.valueDark : token.value;
     return acc;
   }, {});
 
   if (theme) {
-    Object.entries(theme.globalOverrides || {}).forEach(([key, value]) => {
+    const overrides = mode === 'dark'
+      ? (theme.darkOverrides || {})
+      : (theme.globalOverrides || {});
+    Object.entries(overrides).forEach(([key, value]) => {
       resolved[key] = value;
     });
   }

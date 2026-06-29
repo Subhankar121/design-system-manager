@@ -11,13 +11,14 @@ const px = (v: string | undefined, fallback: number): number => {
   return Number.isFinite(n) ? n : fallback;
 };
 
-export function tokensToMuiTheme(t: TokenValueMap): MuiTheme {
+export function tokensToMuiTheme(t: TokenValueMap, mode: 'light' | 'dark' = 'light'): MuiTheme {
   const c = (k: string, fb: string) => t[k] || fb;
   // spacing.sm (~8px) maps to MUI's base spacing unit
   const spacingUnit = px(t['semantic.spacing.sm'] || t['spacing.sm'], 8);
 
   return createTheme({
     palette: {
+      mode,
       primary: { main: c('semantic.color.primary', '#2563eb') },
       secondary: { main: c('semantic.color.secondary', '#7c3aed') },
       success: { main: c('semantic.color.success', '#10b981') },

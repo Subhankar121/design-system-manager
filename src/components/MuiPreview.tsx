@@ -17,6 +17,7 @@ interface Props {
   overrides?: Record<string, string>;  // this component's per-component overrides (incl. drafts)
   variantId?: string | null;
   viewport?: 'desktop' | 'tablet' | 'mobile';
+  mode?: 'light' | 'dark';
 }
 
 const widths: Record<string, string> = { desktop: '100%', tablet: '768px', mobile: '375px' };
@@ -151,11 +152,11 @@ function render(id: string, v: string | null | undefined) {
   }
 }
 
-export function MuiPreview({ component, tokens, overrides, variantId, viewport = 'desktop' }: Props) {
+export function MuiPreview({ component, tokens, overrides, variantId, viewport = 'desktop', mode = 'light' }: Props) {
   const theme = useMemo(() => {
-    const base = tokensToMuiTheme(tokens);
+    const base = tokensToMuiTheme(tokens, mode);
     return component ? applyComponentOverrides(base, component.id, overrides) : base;
-  }, [tokens, overrides, component]);
+  }, [tokens, overrides, component, mode]);
 
   return (
     <ThemeProvider theme={theme}>

@@ -1,0 +1,125 @@
+/* ============================================================================
+   Design System — layout & structure layer (portable, additive)
+   Token scale + colour ROLES + composable primitives. Adapted to the DSM app's
+   indigo/neutral chrome. Compose with these instead of hand-tuning pixels.
+   ========================================================================== */
+
+:root {
+  /* Spacing scale — the ONLY values used for margin / padding / gap */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-7: 32px; --s-8: 40px; --s-9: 48px;
+
+  /* Radius + sizing */
+  --ds-radius: 12px; --ds-radius-sm: 9px; --ds-radius-lg: 16px; --ds-radius-pill: 999px;
+  --ds-control: 40px;            /* min height for inputs / buttons / tap targets */
+  --ds-card-pad: var(--s-6);     /* 24px */
+  --ds-gap: var(--s-5);          /* 20px default gap */
+
+  /* Colour ROLES — mapped to the app's indigo/neutral palette */
+  --ds-bg: #f9fafb;       --ds-surface: #ffffff;   --ds-surface-2: #f3f4f6;
+  --ds-border: #e5e7eb;   --ds-border-soft: #f1f3f5;
+  --ds-fg: #111827;       --ds-muted: #6b7280;     --ds-faint: #9ca3af;
+  --ds-accent: #4f46e5;   --ds-accent-dark: #4338ca; --ds-accent-tint: #eef2ff;
+  --ds-focus: rgba(79,70,229,.30);
+  --ds-good: #047857;     --ds-good-tint: #ecfdf5; --ds-good-border: #a7f3d0;
+  --ds-bad: #be123c;      --ds-bad-tint: #fff1f2;  --ds-bad-border: #fecdd3;
+  --ds-warn: #b45309;     --ds-warn-tint: #fffbeb; --ds-warn-border: #fde68a;
+}
+
+/* ---- Card ---------------------------------------------------------------- */
+.ds-card { background: var(--ds-surface); border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius); padding: var(--ds-card-pad); }
+.ds-card-pad-sm { padding: var(--s-4); }
+.ds-card-flush { padding: 0; overflow: hidden; }
+.ds-card-head { display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--s-3); margin-bottom: var(--s-4); }
+.ds-card-title { margin: 0; font-size: 16px; font-weight: 700; color: var(--ds-fg); line-height: 1.3; }
+.ds-card-sub { font-size: 13px; color: var(--ds-muted); margin: 2px 0 0; line-height: 1.45; }
+
+/* ---- Stack / Row / Grid -------------------------------------------------- */
+.ds-stack { display: flex; flex-direction: column; gap: var(--ds-gap); }
+.ds-stack-sm { display: flex; flex-direction: column; gap: var(--s-2); }
+.ds-stack-md { display: flex; flex-direction: column; gap: var(--s-4); }
+.ds-stack-lg { display: flex; flex-direction: column; gap: var(--s-7); }
+
+.ds-row { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; min-width: 0; }
+.ds-row > * { min-width: 0; }
+.ds-row-between { justify-content: space-between; }
+.ds-spacer { flex: 1 1 auto; }
+
+.ds-grid { display: grid; gap: var(--ds-gap);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.ds-grid-2 { display: grid; gap: var(--ds-gap); grid-template-columns: repeat(2, minmax(0,1fr)); }
+@media (max-width: 720px) { .ds-grid-2 { grid-template-columns: 1fr; } }
+
+/* Docs two-pane: sticky component list + content */
+.ds-docs-layout { display: grid; gap: var(--s-7); grid-template-columns: 240px minmax(0, 1fr); }
+@media (max-width: 900px) { .ds-docs-layout { grid-template-columns: 1fr; } }
+
+/* ---- Nav list (component sidebar) --------------------------------------- */
+.ds-navgroup-title { font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--ds-faint); margin: 0 0 var(--s-2); }
+.ds-navlink { display: block; width: 100%; text-align: left; border: 0; background: transparent;
+  padding: var(--s-2) var(--s-3); border-radius: var(--ds-radius-sm); font: inherit; font-size: 14px;
+  color: var(--ds-muted); cursor: pointer; }
+.ds-navlink:hover { background: var(--ds-surface-2); color: var(--ds-fg); }
+.ds-navlink.is-active { background: var(--ds-accent-tint); color: var(--ds-accent-dark); font-weight: 600; }
+
+/* ---- Segmented control --------------------------------------------------- */
+.ds-seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--ds-surface-2);
+  border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); }
+.ds-seg button { border: 0; background: transparent; cursor: pointer; font: inherit; font-size: 13px;
+  font-weight: 600; text-transform: capitalize; color: var(--ds-muted);
+  padding: 6px 12px; border-radius: 6px; }
+.ds-seg button:hover { color: var(--ds-fg); }
+.ds-seg button.is-active { background: var(--ds-surface); color: var(--ds-accent-dark);
+  box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+
+/* ---- Form controls ------------------------------------------------------- */
+.ds-select { min-height: var(--ds-control); padding: 0 var(--s-3); border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-sm); background: var(--ds-surface); color: var(--ds-fg);
+  font: inherit; font-size: 14px; }
+.ds-select:focus { outline: none; border-color: var(--ds-accent); box-shadow: 0 0 0 3px var(--ds-focus); }
+
+/* ---- Buttons ------------------------------------------------------------- */
+.ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: var(--ds-control); padding: 0 var(--s-5); border: 1px solid transparent;
+  border-radius: var(--ds-radius-sm); background: var(--ds-accent); color: #fff;
+  font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; }
+.ds-btn:hover { background: var(--ds-accent-dark); }
+.ds-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ds-focus); }
+.ds-btn.secondary { background: var(--ds-surface); color: var(--ds-fg); border-color: var(--ds-border); }
+.ds-btn.ghost { background: transparent; color: var(--ds-accent); }
+
+/* ---- Frame (preview container) ------------------------------------------ */
+.ds-frame { border: 1px solid var(--ds-border); border-radius: var(--ds-radius); overflow: hidden; background: var(--ds-surface); }
+.ds-frame-head { border-bottom: 1px solid var(--ds-border-soft); background: var(--ds-surface-2);
+  padding: var(--s-2) var(--s-4); }
+.ds-frame-title { font-size: 14px; font-weight: 600; color: var(--ds-fg); margin: 0; }
+.ds-frame-sub { font-size: 12px; color: var(--ds-muted); margin: 0; }
+
+/* ---- Table --------------------------------------------------------------- */
+.ds-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ds-table { width: 100%; border-collapse: collapse; }
+.ds-table th, .ds-table td { padding: var(--s-3) var(--s-4); text-align: left; vertical-align: middle; }
+.ds-table th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--ds-muted); border-bottom: 1px solid var(--ds-border); background: var(--ds-surface-2); white-space: nowrap; }
+.ds-table td { border-bottom: 1px solid var(--ds-border-soft); font-size: 13px; color: var(--ds-fg); }
+.ds-table tr:last-child td { border-bottom: 0; }
+
+/* ---- Guidance (do / don't) ---------------------------------------------- */
+.ds-note { border-radius: var(--ds-radius); padding: var(--s-4); border: 1px solid; }
+.ds-note-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 var(--s-2); }
+.ds-note ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s-2); }
+.ds-note li { display: flex; gap: var(--s-2); font-size: 13px; line-height: 1.45; }
+.ds-note.good { background: var(--ds-good-tint); border-color: var(--ds-good-border); color: var(--ds-good); }
+.ds-note.bad { background: var(--ds-bad-tint); border-color: var(--ds-bad-border); color: var(--ds-bad); }
+
+/* ---- Helpers ------------------------------------------------------------- */
+.ds-section-title { font-size: 13px; font-weight: 700; color: var(--ds-fg); margin: 0; }
+.ds-section-sub { font-size: 12px; color: var(--ds-muted); margin: 2px 0 0; line-height: 1.45; }
+.ds-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ds-faint); margin: 0; }
+.ds-muted { color: var(--ds-muted); }
+.ds-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.ds-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--ds-border); flex: 0 0 auto; }
+.ds-divider { height: 1px; background: var(--ds-border); border: 0; margin: 0; }
